@@ -83,7 +83,7 @@
     <!--</div>-->
 
     <div class="cube-detail" ng-show="cube.visiblePage=='notification'">
-        <div style="margin: 15px;">
+        <div style="padding: 15px;">
             <form>
                 <h5>Notification List(Comma Separated)</h5>
                 <div class="form-group">
@@ -92,13 +92,12 @@
                 <div class="form-group">
                     <button class="btn btn-primary btn-sm" ng-click="updateNotifyList(cube)">Save</button>
                 </div>
-                <div class="space-4"></div>
             </form>
         </div>
     </div>
 
   <div class="cube-detail" ng-show="cube.visiblePage=='hbase'">
-        <div style="margin: 15px;">
+        <div style="padding: 15px;">
             <div ng-if="cube.hbase">
               <div class="hr hr8 hr-double hr-dotted"></div>
               <h5><b>Segment Number:</b> <span class="red">{{cube.hbase.length}}</span> <b>Total Size:</b> <span class="red">{{cube.totalSize | bytes}}</span></h5>
