@@ -240,6 +240,17 @@ table .radio {
   background-color: white;
 }
 
+.cube-detail h5 {
+  margin-top: 0;
+}
+
+.cube-detail h5,
+.cube-detail .form-group {
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
 .model-detail {
   background-color: white;
 }
@@ -688,6 +699,14 @@ ul.messenger .messenger-message-inner, .ngCellText {
   transition: width 0.5s;;
 }
 
+.cube-models-cntnr .nav-tabs li {
+  cursor: pointer;
+}
+
+.cube-models-cntnr .nav-tabs li.active {
+  cursor: default;
+}
+
 .form-group.required .control-label:after {
   content: "*";
   color: red;
@@ -936,4 +955,10 @@ td.snapshot-usage .tooltip {
 }
 td.snapshot-usage .tooltip-inner {
   max-width: 1024px;
+}
+
+div[ng-controller="CubesCtrl"] .table {
+  & > thead > tr > th {
+    white-space: nowrap;
+  }
 }
