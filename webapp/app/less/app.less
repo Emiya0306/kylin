@@ -963,6 +963,16 @@ div[ng-controller="CubesCtrl"] .table {
   }
 }
 
-div[ng-controller="ModelConditionsSettingsCtrl"] .format-input {
-  margin-top: 15px;
+div[ng-controller="ModelConditionsSettingsCtrl"] {
+  .format-input {
+    margin-top: 15px;
+  }
+  select.col-5 + .chosen-container {
+    width: 49.6% !important;
+  }
+  .format-input.col-5 {
+    display: inline-block;
+    width: 49.6%;
+    margin-top: 0;
+  }
 }
