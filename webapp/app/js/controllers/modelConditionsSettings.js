@@ -28,10 +28,8 @@ KylinApp.controller('ModelConditionsSettingsCtrl', function ($scope, $modal,Meta
 
   // partition date temporary object.
   // Because ng-chosen cannot watch string value, partition date should be object.
-  $scope.partition_date = {
-    type: '',
-    format: ''
-  };
+  $scope.partition_date = { type: '', format: '' };
+  $scope.partition_time = { type: '', format: '' };
   
   $scope.initSetting = function (){
     $scope.selectedTables={fact:VdmUtil.getNameSpaceAliasName($scope.modelsManager.selectedModel.partition_desc.partition_date_column)}
@@ -44,21 +42,8 @@ KylinApp.controller('ModelConditionsSettingsCtrl', function ($scope, $modal,Meta
       }
     }
 
-    var partitionDateFormatOpt = $scope.cubeConfig.partitionDateFormatOpt;
-    var partition_date_format = $scope.modelsManager.selectedModel.partition_desc.partition_date_format;
-
-    if(partitionDateFormatOpt.indexOf(partition_date_format) === -1) {
-      $scope.partition_date.type = 'other';
-      $scope.partition_date.format = partition_date_format;
-    } else {
-      $scope.partition_date.type = partition_date_format;
-      $scope.partition_date.format = '';
-    }
-
-    // Add form change watcher. SetTimeout can escape the first render loop.
-    setTimeout(function() {
-      $scope.addFormValueWatcher();
-    });
+    $scope.initialPartitionSetting('Date');
+    $scope.initialPartitionSetting('Time');
   }
 
   $scope.isFormatEdit = {editable:false};
@@ -120,17 +105,53 @@ KylinApp.controller('ModelConditionsSettingsCtrl', function ($scope, $modal,Meta
       "hasSeparateTimeColumn" : false
   }
 
-  $scope.addFormValueWatcher = function() {
-    $scope.$watch('partition_date.type', function (newValue) {
-      if(newValue !== 'other') {
-        $scope.modelsManager.selectedModel.partition_desc.partition_date_format = $scope.partition_date.format = newValue;
-      } else {
-        $scope.partition_date.format = '';
-      }
-    });
-  
-    $scope.$watch('partition_date.format', function (newValue) {
-      $scope.modelsManager.selectedModel.partition_desc.partition_date_format = newValue;
+  /**
+   * initial date or time partition select
+   * 
+   * @param {String: 'Date' | 'Time'} partitionFieldName 
+   * @desc  cubeConfigName: 'partitionDateFormatOpt' or 'partitionTimeFormatOpt'
+   *        modelFormatKey: 'partition_date_format' or 'partition_time_format'
+   *        scopeName: 'partition_date' or 'partition_time'
+   */
+  $scope.initialPartitionSetting = function(partitionFieldName) {
+    var cubeConfigName = 'partition' + partitionFieldName + 'FormatOpt';
+
+    var lowerCaseName = partitionFieldName.toLowerCase(),
+        modelFormatKey = 'partition_' + lowerCaseName + '_format',
+        scopeName = 'partition_' + lowerCaseName,
+        scopePartitionTypeWatchName = 'partition_' + lowerCaseName + '.type',
+        scopePartitionFormatWatchName = 'partition_' + lowerCaseName + '.format';
+
+    var partitionFormatOpt = $scope.cubeConfig[cubeConfigName];
+    var partition_format = $scope.modelsManager.selectedModel.partition_desc[modelFormatKey];
+
+    if(partitionFormatOpt.indexOf(partition_format) === -1) {
+      $scope[scopeName].type = 'other';
+      $scope[scopeName].format = partition_format;
+    } else {
+      $scope[scopeName].type = partition_format;
+      $scope[scopeName].format = '';
+    }
+
+    // Add form change watcher. SetTimeout can escape the first render loop.
+    setTimeout(function() {
+      $scope.$watch(scopePartitionTypeWatchName, function (newValue, oldValue) {
+        // Ng-chosen will change the value of all selects on DOM when you select each first.
+        // So for fixing this bug, we should compare the newValue and oldValue.
+        if(newValue !== oldValue) {
+          if(newValue !== 'other') {
+            $scope.modelsManager.selectedModel.partition_desc[modelFormatKey] = $scope[scopeName].format = newValue;
+          } else {
+            $scope[scopeName].format = '';
+          }
+        }
+      });
+    
+      $scope.$watch(scopePartitionFormatWatchName, function (newValue, oldValue) {
+        if(newValue !== oldValue) {
+          $scope.modelsManager.selectedModel.partition_desc[modelFormatKey] = newValue;
+        }
+      });
     });
   };
 
