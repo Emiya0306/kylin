@@ -25,6 +25,14 @@
 KylinApp.controller('ModelConditionsSettingsCtrl', function ($scope, $modal,MetaModel,modelsManager,VdmUtil) {
   $scope.modelsManager = modelsManager;
   $scope.availableFactTables = [];
+
+  // partition date temporary object.
+  // Because ng-chosen cannot watch string value, partition date should be object.
+  $scope.partition_date = {
+    type: '',
+    format: ''
+  };
+  
   $scope.initSetting = function (){
     $scope.selectedTables={fact:VdmUtil.getNameSpaceAliasName($scope.modelsManager.selectedModel.partition_desc.partition_date_column)}
     $scope.selectedTablesForPartitionTime={fact:VdmUtil.getNameSpaceAliasName($scope.modelsManager.selectedModel.partition_desc.partition_time_column)}
@@ -35,6 +43,22 @@ KylinApp.controller('ModelConditionsSettingsCtrl', function ($scope, $modal,Meta
         $scope.availableFactTables.push(joinTable[j].alias);
       }
     }
+
+    var partitionDateFormatOpt = $scope.cubeConfig.partitionDateFormatOpt;
+    var partition_date_format = $scope.modelsManager.selectedModel.partition_desc.partition_date_format;
+
+    if(partitionDateFormatOpt.indexOf(partition_date_format) === -1) {
+      $scope.partition_date.type = 'other';
+      $scope.partition_date.format = partition_date_format;
+    } else {
+      $scope.partition_date.type = partition_date_format;
+      $scope.partition_date.format = '';
+    }
+
+    // Add form change watcher. SetTimeout can escape the first render loop.
+    setTimeout(function() {
+      $scope.addFormValueWatcher();
+    });
   }
 
   $scope.isFormatEdit = {editable:false};
@@ -95,6 +119,20 @@ KylinApp.controller('ModelConditionsSettingsCtrl', function ($scope, $modal,Meta
   $scope.partitionColumn ={
       "hasSeparateTimeColumn" : false
   }
+
+  $scope.addFormValueWatcher = function() {
+    $scope.$watch('partition_date.type', function (newValue) {
+      if(newValue !== 'other') {
+        $scope.modelsManager.selectedModel.partition_desc.partition_date_format = $scope.partition_date.format = newValue;
+      } else {
+        $scope.partition_date.format = '';
+      }
+    });
+  
+    $scope.$watch('partition_date.format', function (newValue) {
+      $scope.modelsManager.selectedModel.partition_desc.partition_date_format = newValue;
+    });
+  };
 
   if ($scope.state.mode=='edit'){
     $scope.initSetting();
