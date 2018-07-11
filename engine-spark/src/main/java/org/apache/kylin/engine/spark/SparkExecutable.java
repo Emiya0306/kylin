@@ -27,6 +27,7 @@ import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.hadoop.util.Shell;
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.KylinConfigExt;
 import org.apache.kylin.common.persistence.ResourceTool;
@@ -54,7 +55,7 @@ public class SparkExecutable extends AbstractExecutable {
     private static final String CLASS_NAME = "className";
     private static final String JARS = "jars";
     private static final String JOB_ID = "jobId";
-    private String counter_save_as;
+    private static final String COUNTER_SAVE_AS = "CounterSaveAs";
 
     public void setClassName(String className) {
         this.setParam(CLASS_NAME, className);
@@ -69,7 +70,11 @@ public class SparkExecutable extends AbstractExecutable {
     }
 
     public void setCounterSaveAs(String value) {
-        counter_save_as = value;
+        this.setParam(COUNTER_SAVE_AS, value);
+    }
+
+    public String getCounterSaveAs() {
+        return getParam(COUNTER_SAVE_AS);
     }
 
     private String formatArgs() {
@@ -79,7 +84,7 @@ public class SparkExecutable extends AbstractExecutable {
             tmp.append("-").append(entry.getKey()).append(" ").append(entry.getValue()).append(" ");
             if (entry.getKey().equals(CLASS_NAME)) {
                 stringBuilder.insert(0, tmp);
-            } else if (entry.getKey().equals(JARS) || entry.getKey().equals(JOB_ID)) {
+            } else if (entry.getKey().equals(JARS) || entry.getKey().equals(JOB_ID) || entry.getKey().equals(COUNTER_SAVE_AS)) {
                 // JARS is for spark-submit, not for app
                 continue;
             } else {
@@ -135,8 +140,13 @@ public class SparkExecutable extends AbstractExecutable {
         }
 
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(
-                "export HADOOP_CONF_DIR=%s && %s/bin/spark-submit --class org.apache.kylin.common.util.SparkEntry ");
+        if (Shell.osType == Shell.OSType.OS_TYPE_WIN) {
+            stringBuilder.append(
+                    "set HADOOP_CONF_DIR=%s && %s/bin/spark-submit --class org.apache.kylin.common.util.SparkEntry ");
+        } else {
+            stringBuilder.append(
+                    "export HADOOP_CONF_DIR=%s && %s/bin/spark-submit --class org.apache.kylin.common.util.SparkEntry ");
+        }
 
         Map<String, String> sparkConfs = config.getSparkConfigOverride();
         for (Map.Entry<String, String> entry : sparkConfs.entrySet()) {
@@ -149,9 +159,19 @@ public class SparkExecutable extends AbstractExecutable {
                     formatArgs());
             logger.info("cmd: " + cmd);
             CliCommandExecutor exec = new CliCommandExecutor();
-            PatternedLogger patternedLogger = new PatternedLogger(logger);
+            PatternedLogger patternedLogger = new PatternedLogger(logger, new PatternedLogger.ILogListener() {
+                @Override
+                public void onLogEvent(String infoKey, Map<String, String> info) {
+                    // only care two properties here
+                    if (ExecutableConstants.YARN_APP_ID.equals(infoKey)
+                            || ExecutableConstants.YARN_APP_URL.equals(infoKey)) {
+                        getManager().addJobInfo(getId(), info);
+                    }
+                }
+            });
             exec.execute(cmd, patternedLogger);
 
+            // update all properties
             Map<String, String> joblogInfo = patternedLogger.getInfo();
             readCounters(joblogInfo);
             getManager().addJobInfo(getId(), joblogInfo);
@@ -203,6 +223,7 @@ public class SparkExecutable extends AbstractExecutable {
     }
 
     private void readCounters(final Map<String, String> info) {
+        String counter_save_as = getCounterSaveAs();
         if (counter_save_as != null) {
             String[] saveAsNames = counter_save_as.split(",");
             saveCounterAs(info.get(ExecutableConstants.SOURCE_RECORDS_COUNT), saveAsNames, 0, info);
