@@ -84,8 +84,8 @@
     <input ng-model="$parent.tableName" class="form-control" id="table" placeholder="table1,table2  By default, system will choose 'Default' as the database, you can specify database like 'database.table'"/>
   </div>
   <div class="modal-footer">
-    <button class="btn btn-primary" ng-click="calculate()">Sync</button>
     <button class="btn btn-primary" ng-click="cancel()">Cancel</button>
+    <button class="btn btn-primary" ng-click="calculate()">Sync</button>
   </div>
 </script>
 
@@ -123,8 +123,8 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-primary" ng-click="update()" ng-disabled="config_update_form.key_input.$invalid || config_update_form.value_input.$invalid">Update</button>
       <button class="btn btn-primary" ng-click="cancel()">Cancel</button>
+      <button class="btn btn-primary" ng-click="update()" ng-disabled="config_update_form.key_input.$invalid || config_update_form.value_input.$invalid">Update</button>
     </div>
   </ng-form>
 </script>
