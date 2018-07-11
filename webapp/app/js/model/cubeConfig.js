@@ -104,14 +104,14 @@ KylinApp.constant('cubeConfig', {
     'yyyyMMddHHMM',
     'yyyyMMddHH',
     'yyyyMMdd',
-    'timestamp',
-    'other'
+    // 'timestamp',
+    // 'other'
   ],
   partitionTimeFormatOpt:[
     'HH:mm:ss',
     'HH:mm',
     'HH',
-    'other'
+    // 'other'
   ],
   rowKeyShardOptions:[
     true,false
