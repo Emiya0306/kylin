@@ -39,29 +39,29 @@
     <div>
       <h3>Actions</h3>
     </div>
-    <div style="padding-top: 10px;width: 260px;">
-      <a  class="btn btn-primary btn-lg btn-block" tooltip="Reload all metadata and clear cache" ng-click="reloadMeta()">Reload Metadata</a>
+    <div class="admin-action" tooltip="Reload all metadata and clear cache">
+      <a class="btn btn-primary btn-lg btn-block" ng-click="reloadMeta()">Reload Metadata</a>
     </div>
-    <div style="padding-top: 10px;width: 260px;">
-      <a ng-click="calCardinality();" tooltip="Calculate cardinality of tables" class="btn btn-primary btn-lg btn-block">Calculate Cardinality</a>
+    <div class="admin-action" tooltip="Calculate cardinality of tables">
+      <a ng-click="calCardinality();" class="btn btn-primary btn-lg btn-block">Calculate Cardinality</a>
     </div>
-    <div style="padding-top: 10px;width: 260px;" ng-if="false">
-      <a class="btn btn-success btn-lg btn-block" tooltip="Clean unused HDFS and HBASE space" ng-click="cleanStorage()">Clean Up Storage</a>
+    <div class="admin-action" tooltip="Clean unused HDFS and HBASE space" ng-if="false">
+      <a class="btn btn-success btn-lg btn-block" ng-click="cleanStorage()">Clean Up Storage</a>
     </div>
-    <div style="padding-top: 10px;width: 260px;" ng-if="isCacheEnabled()">
+    <div class="admin-action" ng-if="isCacheEnabled()">
       <a class="btn btn-primary btn-lg btn-block" ng-click="disableCache()">Disable Cache</a>
     </div>
-    <div style="padding-top: 10px;width: 260px;" ng-if="!isCacheEnabled()">
-      <a  class="btn btn-primary btn-lg btn-block" tooltip="Enable Query Cache" ng-click="enableCache()">Enable Cache</a>
+    <div class="admin-action" tooltip="Enable Query Cache" ng-if="!isCacheEnabled()">
+      <a  class="btn btn-primary btn-lg btn-block" ng-click="enableCache()">Enable Cache</a>
     </div>
-    <div style="padding-top: 10px;width: 260px;">
-      <a class="btn btn-primary btn-lg btn-block" tooltip="Update Server Config"  class="btn btn-primary btn-lg"  ng-click="toSetConfig()">Set Config</a>
+    <div class="admin-action" tooltip="Update Server Config">
+      <a class="btn btn-primary btn-lg btn-block" class="btn btn-primary btn-lg" ng-click="toSetConfig()">Set Config</a>
     </div>
-    <div style="padding-top: 10px;width: 260px;">
-      <a class="btn btn-primary btn-lg btn-block" tooltip="Reload Server Config"  class="btn btn-primary btn-lg"  ng-click="reloadConfig()">Reload Config</a>
+    <div class="admin-action" tooltip="Reload Server Config">
+      <a class="btn btn-primary btn-lg btn-block" class="btn btn-primary btn-lg" ng-click="reloadConfig()">Reload Config</a>
     </div>
-    <div style="padding-top: 10px;width: 260px;">
-      <a ng-click="downloadBadQueryFiles();" tooltip="Download Diagnosis Info For Current Project" class="btn btn-primary btn-lg btn-block"><i class="fa fa-ambulance"></i> Diagnosis</a>
+    <div class="admin-action" tooltip="Download Diagnosis Info For Current Project">
+      <a ng-click="downloadBadQueryFiles();" class="btn btn-primary btn-lg btn-block"><i class="fa fa-ambulance"></i> Diagnosis</a>
     </div>
 
     <!--<div>-->
