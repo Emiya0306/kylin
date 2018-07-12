@@ -60,15 +60,20 @@ KylinApp.controller('ModelConditionsSettingsCtrl', function ($scope, $modal,Meta
     });
 
     var data_type = column[0].datatype;
-    if(data_type ==="bigint" ||data_type ==="int" ||data_type ==="integer"){
-      $scope.isFormatEdit.editable = false;
-      $scope.modelsManager.selectedModel.partition_desc.partition_date_format='yyyyMMdd';
-      $scope.partitionColumn.hasSeparateTimeColumn=false;
-      $scope.modelsManager.selectedModel.partition_desc.partition_time_column=null;
-      $scope.modelsManager.selectedModel.partition_desc.partition_time_format=null;
 
-      return;
-    }
+    // enable the partition format editable of all data type
+    // Edit date: 2018/07/12
+    // Author: Roger
+
+    // if(data_type ==="bigint" ||data_type ==="int" ||data_type ==="integer"){
+    //   $scope.isFormatEdit.editable = false;
+    //   $scope.modelsManager.selectedModel.partition_desc.partition_date_format='yyyyMMdd';
+    //   $scope.partitionColumn.hasSeparateTimeColumn=false;
+    //   $scope.modelsManager.selectedModel.partition_desc.partition_time_column=null;
+    //   $scope.modelsManager.selectedModel.partition_desc.partition_time_format=null;
+
+    //   return;
+    // }
 
     $scope.isFormatEdit.editable = true;
     return;
