@@ -357,7 +357,9 @@ KylinApp.controller('HybridCubeSchema', function (
   function getEditHybridCube() {
     loadingRequest.show();
 
-    HybridCubeService.getByName({ hybrid_name: $routeParams.hybridName }, function (hybirdCube) {
+    HybridCubeService.getByName({ hybrid_name: $routeParams.hybridName }, function (_hybirdCube) {
+      var hybirdCube = _hybirdCube.hybridInstance;
+
       $scope.form.uuid = hybirdCube.uuid;
       $scope.form.name = hybirdCube.name;
 
