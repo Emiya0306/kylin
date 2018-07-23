@@ -22,6 +22,13 @@ KylinApp.controller('HybridCubeSchema', function (
   $scope, $q, $location, $interpolate, $templateCache, $routeParams,
   CubeList, HybridCubeService, ProjectModel, modelsManager, SweetAlert, MessageService, loadingRequest, CubeService, CubeDescService
 ) {
+
+  if (!$scope.isEdit && ProjectModel.selectedProject === null) {
+    SweetAlert.swal('Oops...', 'Please select your project first.', 'warning');
+    $location.path("/models");
+    return;
+  }
+
   $scope.LEFT = 'LEFT';
   $scope.RIGHT = 'RIGHT';
   $scope.isFormDisabled = false;
