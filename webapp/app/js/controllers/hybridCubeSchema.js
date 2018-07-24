@@ -23,6 +23,7 @@ KylinApp.controller('HybridCubeSchema', function (
   CubeList, HybridCubeService, ProjectModel, modelsManager, SweetAlert, MessageService, loadingRequest, CubeService, CubeDescService
 ) {
 
+  // check for empty project of header, break the operation.
   if (!$scope.isEdit && ProjectModel.selectedProject === null) {
     SweetAlert.swal('Oops...', 'Please select your project first.', 'warning');
     $location.path("/models");
@@ -50,21 +51,93 @@ KylinApp.controller('HybridCubeSchema', function (
   resetPageData();
 
   /**
+   * Computed: get the model's cubes
+   * 
+   * @param {'LEFT' | 'RIGHT'} dir 
+   */
+  $scope.getFiltedModelCube = function(dir) {
+    var dataRows = $scope.table[dir].dataRows;
+
+    return dataRows.filter(function(row) {
+      return row.model === $scope.form.model;
+    });
+  }
+
+  /**
+   * Computed: get the count of the model cubes
+   * 
+   * @param {'LEFT' | 'RIGHT'} dir 
+   */
+  $scope.getFiltedModelCubeCount = function(dir) {
+    return $scope.getFiltedModelCube(dir).length;
+  }
+
+  /**
+   * Computed: judge that current cube row is checked
+   * 
+   * @param {'LEFT' | 'RIGHT'} dir 
+   * @param {*} cube 
+   */
+  $scope.isCubeChecked = function(dir, cube) {
+    return $scope.table[dir].checkedCubeIds.indexOf(function(cubeId) {
+      return cubeId === cube.uuid;
+    }) !== -1;
+  };
+
+  /**
+   * Computed: judge that all rows of the table are checked
+   * 
+   * @param {'LEFT' | 'RIGHT'} dir 
+   */
+  $scope.isCheckAll = function(dir) {
+    var dataRows = $scope.getFiltedModelCube(dir);
+
+    return dataRows.length ? dataRows.every(function(row) {
+      return row.isChecked === true;
+    }) : false;
+  };
+
+  $scope.toggleCube = function(cube) {
+    cube.isChecked = !cube.isChecked;
+  }
+
+  /**
+   * Computed: judge that model select component can be chosen
+   */
+  $scope.isModelSelectDisabled = function() {
+    return !modelsManager.models.length
+      || $scope.table[$scope.RIGHT].dataRows.length;
+  }
+
+  /**
+   * Computed: judge is form valid
+   */
+  $scope.isFormValid = function() {
+    // get schema data
+    var schema = getSchema();
+
+    return Object.keys(schema).every(function(key) {
+      // Array.length for checking select cubes count >= 2
+      // otherwise checking empty value
+      return schema[key] instanceof Array ? schema[key].length > 1 : schema[key];
+    });
+  };
+
+  /**
    * Action: toggle all rows' check status of the table
    * 
-   * @param {*} dir 
+   * @param {'LEFT' | 'RIGHT'} dir 
+   * @param {undefined | boolean} toStatus: for change all the table's cubes hardly
    */
   $scope.toggleAll = function(dir, toStatus) {
     var isCheckAll = $scope.isCheckAll(dir);
-    var dataRows = $scope.table[dir].dataRows;
+    var dataRows = $scope.getFiltedModelCube(dir);
 
     dataRows.forEach(function(row) {
-      if(row.model === $scope.form.model) {
-        if(toStatus !== undefined) {
-          row.isChecked = toStatus;
-        } else {
-          row.isChecked = !isCheckAll;
-        }
+      if(toStatus !== undefined) {
+        row.isChecked = toStatus;
+      } else {
+        row.isChecked = !isCheckAll;
       }
     });
   };
@@ -72,7 +145,7 @@ KylinApp.controller('HybridCubeSchema', function (
   /**
    * Action: transfer checked rows from destination table to source table
    * 
-   * @param {*} dir 
+   * @param {'LEFT' | 'RIGHT'} dir 
    */
   $scope.transferTo = function(dir) {
     var toDir = dir;
@@ -100,77 +173,10 @@ KylinApp.controller('HybridCubeSchema', function (
   }
 
   /**
-   * Computed: get the model's cubes
-   * 
-   * @param {*} dir 
-   */
-  $scope.getFiltedModelCube = function(dir) {
-    var dataRows = $scope.table[dir].dataRows;
-
-    return dataRows.filter(function(row) {
-      return row.model === $scope.form.model;
-    });
-  }
-
-  /**
-   * Computed: get the count of the model cubes
-   * 
-   * @param {*} dir 
-   */
-  $scope.getFiltedModelCubeCount = function(dir) {
-    return $scope.getFiltedModelCube(dir).length;
-  }
-
-  /**
-   * Computed: judge that current cube row is checked
-   * 
-   * @param {*} dir 
-   * @param {*} cube 
-   */
-  $scope.isCubeChecked = function(dir, cube) {
-    return $scope.table[dir].checkedCubeIds.indexOf(function(cubeId) {
-      return cubeId === cube.uuid;
-    }) !== -1;
-  };
-
-  /**
-   * Computed: judge that all rows of the table are checked
-   * 
-   * @param {*} dir 
-   */
-  $scope.isCheckAll = function(dir) {
-    var dataRows = $scope.getFiltedModelCube(dir);
-
-    return dataRows.length ? dataRows.every(function(row) {
-      return row.isChecked === true;
-    }) : false;
-  };
-
-  $scope.toggleCube = function(cube) {
-    cube.isChecked = !cube.isChecked;
-  }
-
-  /**
-   * Computed: judge that model select component can be chosen
-   */
-  $scope.isModelSelectDisabled = function() {
-    return !modelsManager.models.length
-      || $scope.table[$scope.RIGHT].dataRows.length;
-  }
-
-  /**
    * Action: page edit cancel handler
    */
   $scope.cancel = function() {
     history.go(-1);
-  };
-
-  $scope.isFormValid = function() {
-    var schema = getSchema();
-
-    return Object.keys(schema).every(function(key) {
-      return schema[key] instanceof Array ? schema[key].length > 1 : schema[key];
-    });
   };
 
   /**
@@ -205,6 +211,7 @@ KylinApp.controller('HybridCubeSchema', function (
         }
         $location.path('/models');
       }
+      // hide global loading
       loadingRequest.hide();
     }
 
@@ -218,54 +225,16 @@ KylinApp.controller('HybridCubeSchema', function (
         var template = hybridCubeResultTmpl({ text: 'Failed to take action.', schema: schema });
         MessageService.sendMsg(template, 'error', {}, true, 'top_center');
       }
-      //end loading
+      // hide global loading
       loadingRequest.hide();
     }
   }
 
-  /**
-   * Util: $watch extention method.
-   * @param {*} watchers 
-   * @param {*} callback 
-   */
-  $scope.$watchAll = function(watchers, type, callback) {
-    var changeStatus = [];
-
-    watchers.filter(function(watcher) {
-      return watcher;
-    }).forEach(function(watcher, index) {
-      changeStatus.push(false);
-
-      (function(i) {
-        $scope.$watch(watcher, function(newValue, oldValue) {
-          if(JSON.stringify(newValue) !== JSON.stringify(oldValue)) {
-            changeStatus[i] = true;
-          }
-
-          var shouldCallback = type === 'or'
-            ? changeStatus.some(function(status) {
-              return status;
-            })
-            : changeStatus.every(function(status) {
-              return status;
-            });
-
-          if(shouldCallback) {
-            callback();
-          }
-          if(watchers.length - 1 === i) {
-            changeStatus = changeStatus.map(function() {
-              return false;
-            });
-          }
-        });
-      })(index);
-
-    });
-  }
-
   doPerpare();
 
+  /**
+   * Init: initialize watcher
+   */
   function doPerpare() {
     $scope.$watch('projectModel.selectedProject', function (newValue, oldValue) {
       if (newValue != oldValue || newValue == null) {
@@ -279,6 +248,10 @@ KylinApp.controller('HybridCubeSchema', function (
       $scope.form.model = modelsManager.models[0] && modelsManager.models[0].name || '';
     });
 
+    $scope.$watch('form.model', function() {
+      cleanCubeStatus();
+    });
+
     $scope.$watch('cubeList.cubes', function() {
       loadTableData();
 
@@ -289,6 +262,9 @@ KylinApp.controller('HybridCubeSchema', function (
     });
   }
 
+  /**
+   * Helper: get form data
+   */
   function getSchema() {
     const schema = {
       hybrid: $scope.form.name,
@@ -301,6 +277,9 @@ KylinApp.controller('HybridCubeSchema', function (
     return schema;
   }
 
+  /**
+   * Helper: reset page data
+   */
   function resetPageData() {
     $scope.table = {};
     $scope.form.model = '';
@@ -312,6 +291,9 @@ KylinApp.controller('HybridCubeSchema', function (
     };
   }
 
+  /**
+   * Helper: ajax request models
+   */
   function listModels () {
     var defer = $q.defer();
     var queryParam = {};
@@ -332,6 +314,9 @@ KylinApp.controller('HybridCubeSchema', function (
     });
   };
 
+  /**
+   * Helper: clean left table and reset status
+   */
   function loadTableData() {
     var cubesData = Object.create($scope.cubeList.cubes);
     var unusedCubeTable = $scope.table[$scope.LEFT].dataRows = [];
@@ -367,6 +352,25 @@ KylinApp.controller('HybridCubeSchema', function (
     }
   })};
 
+  /**
+   * Helper: if $scope.form.model is changed, clean all the selected cube.
+   */
+  function cleanCubeStatus() {
+    // clean left table cubes
+    $scope.table[$scope.LEFT].dataRows.forEach(function(row) {
+      row.isChecked = false;
+    });
+    // check right table cubes
+    $scope.table[$scope.RIGHT].dataRows.forEach(function(row) {
+      row.isChecked = true;
+    });
+    // move right table cubes to left table
+    $scope.transferTo($scope.LEFT);
+  }
+
+  /**
+   * Helper: get edit hybrid cube
+   */
   function getEditHybridCube() {
     loadingRequest.show();
 
