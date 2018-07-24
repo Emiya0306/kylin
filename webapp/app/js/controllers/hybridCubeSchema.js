@@ -100,6 +100,28 @@ KylinApp.controller('HybridCubeSchema', function (
   }
 
   /**
+   * Computed: get the model's cubes
+   * 
+   * @param {*} dir 
+   */
+  $scope.getFiltedModelCube = function(dir) {
+    var dataRows = $scope.table[dir].dataRows;
+
+    return dataRows.filter(function(row) {
+      return row.model === $scope.form.model;
+    });
+  }
+
+  /**
+   * Computed: get the count of the model cubes
+   * 
+   * @param {*} dir 
+   */
+  $scope.getFiltedModelCubeCount = function(dir) {
+    return $scope.getFiltedModelCube(dir).length;
+  }
+
+  /**
    * Computed: judge that current cube row is checked
    * 
    * @param {*} dir 
@@ -117,24 +139,15 @@ KylinApp.controller('HybridCubeSchema', function (
    * @param {*} dir 
    */
   $scope.isCheckAll = function(dir) {
-    var dataRows = $scope.table[dir].dataRows;
+    var dataRows = $scope.getFiltedModelCube(dir);
 
     return dataRows.length ? dataRows.every(function(row) {
       return row.isChecked === true;
     }) : false;
   };
 
-  /**
-   * Computed: get the count of the model cubes
-   * 
-   * @param {*} dir 
-   */
-  $scope.getFiltedModelCubeCount = function(dir) {
-    var dataRows = $scope.table[dir].dataRows;
-
-    return dataRows.filter(function(row) {
-      return row.model === $scope.form.model;
-    });
+  $scope.toggleCube = function(cube) {
+    cube.isChecked = !cube.isChecked;
   }
 
   /**

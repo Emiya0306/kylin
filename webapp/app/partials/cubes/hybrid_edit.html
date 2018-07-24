@@ -65,20 +65,22 @@
                 </div>
               </div>
               <div class="row fix-height-table">
-                <table class="table table-striped table-bordered table-hover dataTable no-footer ng-scope" ng-if="getFiltedModelCubeCount(LEFT).length">
+                <table class="table table-striped table-bordered table-hover dataTable no-footer ng-scope" ng-if="getFiltedModelCubeCount(LEFT)">
                   <thead>
-                    <tr style="cursor: pointer">
-                      <th>
-                        <input type="checkbox" ng-checked="isCheckAll(LEFT)" ng-click="toggleAll(LEFT)" />
+                    <tr>
+                      <th class="table-checkbox">
+                        <img ng-if="!isCheckAll(LEFT)" src="image/checkbox-.svg" ng-click="toggleAll(LEFT)" />
+                        <img ng-if="isCheckAll(LEFT)" src="image/checkbox+.svg" ng-click="toggleAll(LEFT)" />
                       </th>
                       <th>Name</th>
                       <th>Status</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr ng-repeat="cube in table[LEFT].dataRows" ng-if="cube.model === form.model">
-                      <td>
-                        <input type="checkbox" ng-model="cube.isChecked" />
+                    <tr ng-repeat="cube in table[LEFT].dataRows" ng-if="cube.model === form.model" ng-click="toggleCube(cube)" style="cursor: pointer;">
+                      <td class="table-checkbox">
+                        <img ng-if="!cube.isChecked" src="image/checkbox-.svg" />
+                        <img ng-if="cube.isChecked" src="image/checkbox+.svg" />
                       </td>
                       <td>{{ cube.name }}</td>
                       <td>
@@ -91,7 +93,7 @@
                 </table>
               </div>
 
-              <div class="data-empty" ng-if="!getFiltedModelCubeCount(LEFT).length">
+              <div class="data-empty" ng-if="!getFiltedModelCubeCount(LEFT)">
                 Empty
               </div>
 
@@ -121,21 +123,23 @@
               <div class="row table-header">
                 <label class="col-xs-12 control-label no-padding-right">Selected Cubes: {{table[RIGHT].dataRows.length}}</label>
               </div>
-              <div class="row">
+              <div class="row fix-height-table">
                 <table class="table table-striped table-bordered table-hover dataTable no-footer ng-scope" ng-if="table[RIGHT].dataRows.length">
                   <thead>
-                    <tr style="cursor: pointer">
-                      <th>
-                        <input type="checkbox" ng-checked="isCheckAll(RIGHT)" ng-click="toggleAll(RIGHT)" />
+                    <tr>
+                      <th class="table-checkbox">
+                        <img ng-if="!isCheckAll(RIGHT)" src="image/checkbox-.svg" ng-click="toggleAll(RIGHT)" />
+                        <img ng-if="isCheckAll(RIGHT)" src="image/checkbox+.svg" ng-click="toggleAll(RIGHT)" />
                       </th>
                       <th>Name</th>
                       <th>Status</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr ng-repeat="cube in table[RIGHT].dataRows">
-                      <td>
-                        <input type="checkbox" ng-model="cube.isChecked" />
+                    <tr ng-repeat="cube in table[RIGHT].dataRows" ng-click="toggleCube(cube)" style="cursor: pointer;">
+                      <td class="table-checkbox">
+                        <img ng-if="!cube.isChecked" src="image/checkbox-.svg" />
+                        <img ng-if="cube.isChecked" src="image/checkbox+.svg" />
                       </td>
                       <td>{{ cube.name }}</td>
                       <td>
